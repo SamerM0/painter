@@ -14,6 +14,9 @@ Press I to redo
 # Libraries
 
 cv2 -> drawing canvas
+
 numpy -> arrays / matrices
+
 math -> math
+
 enum -> used to indentify different drawing modes
