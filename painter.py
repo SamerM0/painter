@@ -4,8 +4,9 @@ from enum import Enum
 
 WINDOW_NAME = "Canvas"
 class Painter():
-    def __init__(self,x,y):
+    def __init__(self,x,y,bgr_color):
         self.current_mode = DrawingModes.NONE
+        self.bgr_color = bgr_color
         self.__canvas = np.zeros((x, y, 3), dtype="uint8")
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
