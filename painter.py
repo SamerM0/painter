@@ -32,7 +32,7 @@ class Painter():
     def erase_info(self):#erase info box
         cv2.rectangle(self.__canvas,(0,0),(self.width,40),(0,0,0), -1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
-        
+
     def is_running(self):
         try:
             cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE)
@@ -40,24 +40,36 @@ class Painter():
         except cv2.error:
             return False
 
-    def paint(self):#paint on canvas
+    def paint(self,verts,color = None,is_placeholder = False):#paint on canvas
+        if color is None:
+            color = self.bgr_color
         if self.current_mode == DrawingModes.CIRCLE:
-            cv2.circle(self.__canvas, self.__vertices[0], math.ceil(math.dist(self.__vertices[0], self.__vertices[1])), self.bgr_color, -1)
+            cv2.circle(self.__canvas, verts[0], math.ceil(math.dist(verts[0], verts[1])), color, -1)
         elif self.current_mode == DrawingModes.RECTANGLE:
-            cv2.rectangle(self.__canvas, self.__vertices[0], self.__vertices[1], self.bgr_color, -1)
+            cv2.rectangle(self.__canvas, verts[0], verts[1], color, -1)
         elif self.current_mode == DrawingModes.POLYGON:
-            points = np.array(self.__vertices)
-            cv2.fillPoly(self.__canvas, [points], self.bgr_color)
+            points = np.array(verts)
+            cv2.fillPoly(self.__canvas, [points], color)
         elif self.current_mode == DrawingModes.ERASE:
-            x,y = self.__vertices[0]
+            x,y = verts[0]
             cv2.rectangle(self.__canvas, (x-ERASE_SIZE, y-ERASE_SIZE), (x+ERASE_SIZE, y+ERASE_SIZE), (0,0,0), -1)
+        if is_placeholder:
+            self.show_info()
+            return
         self.add_operation()
         #reset vertices and drawing state
         self.__vertices = []
         self.is_drawing = False
         self.show_info()
         
-    
+    def placeholder(self,x,y):#show placeholder while drawing
+        if not self.is_drawing:
+            return
+        self.remove_placeholder()
+        self.paint([*self.__vertices,[x,y]],color = (128,128,128),is_placeholder=True)
+    def remove_placeholder(self):#remove placeholder by repainting last operation
+        self.__canvas = self.operations[-1].copy()
+        self.show_info()
     def add_point(self, x, y):#add point to vertices array
         if self.current_mode == DrawingModes.NONE:
             return
@@ -67,16 +79,16 @@ class Painter():
 
     def validate_paint(self):#validate if enough points are added to paint
         if self.current_mode == DrawingModes.CIRCLE and len(self.__vertices) == 2:
-            self.paint()
+            self.paint(self.__vertices)
         elif self.current_mode == DrawingModes.RECTANGLE and len(self.__vertices) == 2:
-            self.paint()
+            self.paint(self.__vertices)
         elif self.current_mode == DrawingModes.POLYGON:
             return
         elif self.current_mode == DrawingModes.CROP and len(self.__vertices) == 4:
             self.crop()
         elif self.current_mode == DrawingModes.ERASE:
-            self.paint()
-        
+            self.paint(self.__vertices)
+
     def start_drawing(self):
         if self.is_drawing:
             return
@@ -84,10 +96,11 @@ class Painter():
         self.show_info()
 
     def end_polygon(self):#end polygon drawing
+        self.remove_placeholder()
         if self.current_mode != DrawingModes.POLYGON:
             return
         elif len(self.__vertices) > 2:
-            self.paint()
+            self.paint(self.__vertices)
         
     def crop(self):#crop by creating a mask
         mask = np.zeros(self.__canvas.shape, dtype=np.uint8)
@@ -100,6 +113,8 @@ class Painter():
         self.show_info()
 
     def rotate(self, angle):#rotate canvas using rotation matrix
+        if self.is_drawing:
+            return #cannot rotate while drawing
         self.erase_info()
         rotation_matrix = cv2.getRotationMatrix2D((self.width//2, (self.height-40)//2), angle, 1)
         self.__canvas = cv2.warpAffine(self.__canvas, rotation_matrix, (self.width, self.height-40))

@@ -34,5 +34,5 @@ class InputHandler():
     def mouse_listener(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.painter.add_point(x,y)
-        #if event == cv2.EVENT_MOUSEMOVE:
-        #    self.painter.placeholder(x,y)
+        elif event == cv2.EVENT_MOUSEMOVE:
+            self.painter.placeholder(x,y)
