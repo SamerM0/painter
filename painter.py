@@ -3,6 +3,7 @@ import numpy as np
 from enum import Enum
 import math
 WINDOW_NAME = "Canvas"
+ERASE_SIZE = 50
 class Painter():
     def __init__(self,x,y,bgr_color):#initialize canvas
         self.current_mode = DrawingModes.NONE
@@ -10,8 +11,7 @@ class Painter():
         self.__canvas = np.zeros((x, y, 3), dtype="uint8")
         self.__vertices = []
         self.is_drawing = False
-        cv2.rectangle(self.__canvas,(0,0),(self.__canvas.shape[0],40),(255,255,255), -1)
-        cv2.putText(self.__canvas, f"Mode: {self.current_mode.name}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, .5, (0,0,0), 1)
+        self.show_info()
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
     def set_mode(self, mode): #set drawing mode
@@ -32,24 +32,27 @@ class Painter():
         except cv2.error:
             return False
 
-    def paint(self, color = None):#paint on canvas
-        if color is None:
-            color = self.bgr_color
-
+    def paint(self):#paint on canvas
         if self.current_mode == DrawingModes.CIRCLE:
-            cv2.circle(self.__canvas, self.__vertices[0], math.ceil(math.dist(self.__vertices[0], self.__vertices[1])), color, -1)
+            cv2.circle(self.__canvas, self.__vertices[0], math.ceil(math.dist(self.__vertices[0], self.__vertices[1])), self.bgr_color, -1)
         elif self.current_mode == DrawingModes.RECTANGLE:
-            cv2.rectangle(self.__canvas, self.__vertices[0], self.__vertices[1], color, -1)
+            cv2.rectangle(self.__canvas, self.__vertices[0], self.__vertices[1], self.bgr_color, -1)
         elif self.current_mode == DrawingModes.POLYGON:
             points = np.array(self.__vertices)
+            cv2.fillPoly(self.__canvas, [points], self.bgr_color)
+        elif self.current_mode == DrawingModes.ERASE:
+            x,y = self.__vertices[0]
+            cv2.rectangle(self.__canvas, (x-ERASE_SIZE, y-ERASE_SIZE), (x+ERASE_SIZE, y+ERASE_SIZE), (0,0,0), -1)
 
-            cv2.fillPoly(self.__canvas, [points], color)
+        #reset vertices and drawing state
         self.__vertices = []
         self.is_drawing = False
         self.show_info()
         
 
     def add_point(self, x, y):#add point to vertices array
+        if self.current_mode == DrawingModes.NONE:
+            return
         self.start_drawing()
         self.__vertices.append([x, y])
         self.validate_paint()
@@ -61,6 +64,8 @@ class Painter():
             self.paint()
         elif self.current_mode == DrawingModes.POLYGON:
             return
+        elif self.current_mode == DrawingModes.ERASE:
+            self.paint()
         
     def start_drawing(self):
         if self.is_drawing:

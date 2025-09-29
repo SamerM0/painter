@@ -19,6 +19,8 @@ class InputHandler():
                 self.painter.set_mode(DrawingModes.POLYGON)
             elif key & 0xFF == ord("s"):
                 self.painter.end_polygon()
+            elif key & 0xFF == ord("e"):
+                self.painter.set_mode(DrawingModes.ERASE)
     def mouse_listener(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.painter.add_point(x,y)
