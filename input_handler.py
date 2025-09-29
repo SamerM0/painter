@@ -3,6 +3,7 @@ from painter import Painter, DrawingModes
 class InputHandler():
     def __init__(self, painter : Painter):
         self.painter = painter
+        cv2.setMouseCallback("Canvas", self.mouse_listener)
     def start(self):
         while self.painter.is_running():
             key = cv2.waitKey(0)
@@ -16,3 +17,7 @@ class InputHandler():
                 self.painter.set_mode(DrawingModes.RECTANGLE)
             elif key & 0xFF == ord("p"):
                 self.painter.set_mode(DrawingModes.POLYGON)
+    def mouse_listener(self, event, x, y, flags, param):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            print("START DRAWING")
+            self.painter.paint(x,y)
