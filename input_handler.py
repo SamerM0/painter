@@ -1,5 +1,6 @@
 import cv2
-from painter import Painter, DrawingModes
+from drawing_modes import DrawingModes
+from painter import Painter
 class InputHandler():
     def __init__(self, painter : Painter):
         self.painter = painter
@@ -23,6 +24,10 @@ class InputHandler():
                 self.painter.set_mode(DrawingModes.ERASE)
             elif key & 0xFF == ord("x"):
                 self.painter.set_mode(DrawingModes.CROP)
+            elif key & 0xFF == ord("a"):
+                self.painter.rotate(90)
+            elif key & 0xFF == ord("d"):
+                self.painter.rotate(-90)
     def mouse_listener(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.painter.add_point(x,y)

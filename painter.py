@@ -1,6 +1,6 @@
 import cv2
 import numpy as np
-from enum import Enum
+from drawing_modes import DrawingModes
 import math
 WINDOW_NAME = "Canvas"
 ERASE_SIZE = 50
@@ -11,6 +11,10 @@ class Painter():
         self.__canvas = np.zeros((x, y, 3), dtype="uint8")
         self.__vertices = []
         self.is_drawing = False
+        self.width = x
+        self.height = y
+        self.operations = []
+        self.undid_operations = []
         self.show_info()
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
@@ -21,10 +25,13 @@ class Painter():
         self.show_info()
 
     def show_info(self):
-        cv2.rectangle(self.__canvas,(0,0),(self.__canvas.shape[0],40),(255,255,255), -1)
+        cv2.rectangle(self.__canvas,(0,0),(self.width,40),(255,255,255), -1)
         cv2.putText(self.__canvas, f"Mode: {self.current_mode.name} {str(' ' * 25)} Drawing : {self.is_drawing}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, .5, (0,0,0), 1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
+    def erase_info(self):#erase info box
+        cv2.rectangle(self.__canvas,(0,0),(self.width,40),(0,0,0), -1)
+        cv2.imshow(WINDOW_NAME, self.__canvas)
     def is_running(self):
         try:
             cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE)
@@ -43,7 +50,6 @@ class Painter():
         elif self.current_mode == DrawingModes.ERASE:
             x,y = self.__vertices[0]
             cv2.rectangle(self.__canvas, (x-ERASE_SIZE, y-ERASE_SIZE), (x+ERASE_SIZE, y+ERASE_SIZE), (0,0,0), -1)
-
         #reset vertices and drawing state
         self.__vertices = []
         self.is_drawing = False
@@ -91,15 +97,11 @@ class Painter():
         self.is_drawing = False
         self.show_info()
 
+    def rotate(self, angle):#rotate canvas using rotation matrix
+        self.erase_info()
+        rotation_matrix = cv2.getRotationMatrix2D((self.width//2, (self.height-40)//2), angle, 1)
+        self.__canvas = cv2.warpAffine(self.__canvas, rotation_matrix, (self.width, self.height-40))
+        self.show_info()
+
     def free(self):
         cv2.destroyAllWindows()
-
-class DrawingModes(Enum):
-    NONE = 0
-    LINE = 1
-    RECTANGLE = 2
-    CIRCLE = 3
-    POLYGON = 4
-    ERASE = 5
-    CROP = 6
-    ROTATE = 7
