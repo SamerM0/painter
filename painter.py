@@ -33,7 +33,7 @@ class Painter():
         cv2.rectangle(self.__canvas,(0,0),(self.width,40),(0,0,0), -1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
-    def is_running(self):
+    def is_running(self):#check if window is open
         try:
             cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE)
             return True
@@ -47,7 +47,7 @@ class Painter():
             cv2.circle(self.__canvas, verts[0], math.ceil(math.dist(verts[0], verts[1])), color, -1)
         elif self.current_mode == DrawingModes.RECTANGLE:
             cv2.rectangle(self.__canvas, verts[0], verts[1], color, -1)
-        elif self.current_mode == DrawingModes.POLYGON:
+        elif self.current_mode == DrawingModes.POLYGON or self.current_mode == DrawingModes.CROP:
             points = np.array(verts)
             cv2.fillPoly(self.__canvas, [points], color)
         elif self.current_mode == DrawingModes.ERASE:
@@ -56,20 +56,21 @@ class Painter():
         if is_placeholder:
             self.show_info()
             return
-        self.add_operation()
+        self.add_operation() #add to stack
         #reset vertices and drawing state
         self.__vertices = []
         self.is_drawing = False
         self.show_info()
         
     def placeholder(self,x,y):#show placeholder while drawing
-        if not self.is_drawing:
+        if not self.is_drawing and self.current_mode != DrawingModes.CROP:
             return
         self.remove_placeholder()
         self.paint([*self.__vertices,[x,y]],color = (128,128,128),is_placeholder=True)
-    def remove_placeholder(self):#remove placeholder by repainting last operation
+    def remove_placeholder(self):#remove placeholder 
         self.__canvas = self.operations[-1].copy()
         self.show_info()
+
     def add_point(self, x, y):#add point to vertices array
         if self.current_mode == DrawingModes.NONE:
             return
@@ -103,6 +104,7 @@ class Painter():
             self.paint(self.__vertices)
         
     def crop(self):#crop by creating a mask
+        self.remove_placeholder()
         mask = np.zeros(self.__canvas.shape, dtype=np.uint8)
         points = np.array(self.__vertices)
         cv2.fillPoly(mask, [points], (255,255,255))
