@@ -32,6 +32,7 @@ class Painter():
             cv2.circle(self.__canvas, (x, y), math.ceil(self.__scale * SIZE_CONSTANT), self.bgr_color, -1)
         elif self.current_mode == DrawingModes.RECTANGLE:
             cv2.rectangle(self.__canvas,(math.ceil(x-self.__scale * SIZE_CONSTANT),math.ceil(y-self.__scale * SIZE_CONSTANT)),(math.ceil(x+self.__scale * SIZE_CONSTANT),math.ceil(y+self.__scale * SIZE_CONSTANT)), self.bgr_color, -1)
+        self.set_mode(self.current_mode)
         cv2.imshow(WINDOW_NAME, self.__canvas)
     def free(self):
         cv2.destroyAllWindows()
