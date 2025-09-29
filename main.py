@@ -2,10 +2,10 @@ from painter import Painter
 from input_handler import InputHandler
 import time
 def main():
-    #x,y = get_resolution()
-    #bgr_color = get_color()
-    x,y = 500,500
-    bgr_color = (255,0,0)
+    x,y = get_resolution()
+    bgr_color = get_color()
+    #x,y = 700,900
+    #bgr_color = (255,0,0)
     painter = Painter(x,y,bgr_color)
     input_handler = InputHandler(painter)
     input_handler.start()

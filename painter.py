@@ -8,7 +8,7 @@ class Painter():
     def __init__(self,x,y,bgr_color):#initialize canvas
         self.current_mode = DrawingModes.NONE
         self.bgr_color = bgr_color
-        self.__canvas = np.zeros((x, y, 3), dtype="uint8")
+        self.__canvas = np.zeros((y, x, 3), dtype="uint8")
         self.__vertices = []
         self.is_drawing = False
         self.width = x
@@ -25,12 +25,12 @@ class Painter():
         self.show_info()
 
     def show_info(self):
-        cv2.rectangle(self.__canvas,(0,0),(self.width,40),(255,255,255), -1)
-        cv2.putText(self.__canvas, f"Mode: {self.current_mode.name} {str(' ' * 25)} Drawing : {self.is_drawing}", (10, 30), cv2.FONT_HERSHEY_SIMPLEX, .5, (0,0,0), 1)
+        cv2.rectangle(self.__canvas,(0,0),(self.width,20),(255,255,255), -1)
+        cv2.putText(self.__canvas, f"Mode: {self.current_mode.name} {str(' ' * 25)} Drawing : {self.is_drawing}", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, .5, (0,0,0), 1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
     def erase_info(self):#erase info box
-        cv2.rectangle(self.__canvas,(0,0),(self.width,40),(0,0,0), -1)
+        cv2.rectangle(self.__canvas,(0,0),(self.width,20),(0,0,0), -1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
     def is_running(self):#check if window is open
