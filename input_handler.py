@@ -8,7 +8,6 @@ class InputHandler():
     def start(self):
         while self.painter.is_running():
             key = cv2.waitKey(0)
-            print(f"key pressed: {key}")
             if key & 0xFF == 27:  # ESC key
                 self.painter.free()
                 break
@@ -28,6 +27,10 @@ class InputHandler():
                 self.painter.rotate(90)
             elif key & 0xFF == ord("d"):
                 self.painter.rotate(-90)
+            elif key & 0xFF == ord("u"):
+                self.painter.undo()
+            elif key & 0xFF == ord("i"):
+                self.painter.redo()
     def mouse_listener(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
             self.painter.add_point(x,y)

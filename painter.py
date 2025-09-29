@@ -13,7 +13,7 @@ class Painter():
         self.is_drawing = False
         self.width = x
         self.height = y
-        self.operations = []
+        self.operations = [self.__canvas.copy()]
         self.undid_operations = []
         self.show_info()
         cv2.imshow(WINDOW_NAME, self.__canvas)
@@ -32,6 +32,7 @@ class Painter():
     def erase_info(self):#erase info box
         cv2.rectangle(self.__canvas,(0,0),(self.width,40),(0,0,0), -1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
+        
     def is_running(self):
         try:
             cv2.getWindowProperty(WINDOW_NAME, cv2.WND_PROP_VISIBLE)
@@ -50,12 +51,13 @@ class Painter():
         elif self.current_mode == DrawingModes.ERASE:
             x,y = self.__vertices[0]
             cv2.rectangle(self.__canvas, (x-ERASE_SIZE, y-ERASE_SIZE), (x+ERASE_SIZE, y+ERASE_SIZE), (0,0,0), -1)
+        self.add_operation()
         #reset vertices and drawing state
         self.__vertices = []
         self.is_drawing = False
         self.show_info()
         
-
+    
     def add_point(self, x, y):#add point to vertices array
         if self.current_mode == DrawingModes.NONE:
             return
@@ -102,6 +104,27 @@ class Painter():
         rotation_matrix = cv2.getRotationMatrix2D((self.width//2, (self.height-40)//2), angle, 1)
         self.__canvas = cv2.warpAffine(self.__canvas, rotation_matrix, (self.width, self.height-40))
         self.show_info()
+        self.add_operation()
+
+    def undo(self):
+        if len(self.operations) < 2:
+            print("No operation to undo")
+            return
+        self.undid_operations.append(self.operations.pop())
+        self.__canvas = self.operations[-1].copy()
+        self.show_info()
+
+    def redo(self):
+        if len(self.undid_operations) < 1:
+            print("No operation to redo")
+            return
+        self.operations.append(self.undid_operations.pop())
+        self.__canvas = self.operations[-1].copy()
+        self.show_info()
+
+    def add_operation(self):
+        self.operations.append(self.__canvas.copy())
+        self.undid_operations = []
 
     def free(self):
         cv2.destroyAllWindows()
