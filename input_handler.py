@@ -17,7 +17,10 @@ class InputHandler():
                 self.painter.set_mode(DrawingModes.RECTANGLE)
             elif key & 0xFF == ord("p"):
                 self.painter.set_mode(DrawingModes.POLYGON)
+            elif key & 0xFF == ord("s"):
+                self.painter.end_polygon()
     def mouse_listener(self, event, x, y, flags, param):
         if event == cv2.EVENT_LBUTTONDOWN:
-            print("START DRAWING")
-            self.painter.paint(x,y)
+            self.painter.add_point(x,y)
+        #if event == cv2.EVENT_MOUSEMOVE:
+        #    self.painter.placeholder(x,y)
