@@ -64,6 +64,8 @@ class Painter():
             self.paint()
         elif self.current_mode == DrawingModes.POLYGON:
             return
+        elif self.current_mode == DrawingModes.CROP and len(self.__vertices) == 4:
+            self.crop()
         elif self.current_mode == DrawingModes.ERASE:
             self.paint()
         
@@ -78,7 +80,17 @@ class Painter():
             return
         elif len(self.__vertices) > 2:
             self.paint()
-    
+        
+    def crop(self):#crop by creating a mask
+        mask = np.zeros(self.__canvas.shape, dtype=np.uint8)
+        points = np.array(self.__vertices)
+        cv2.fillPoly(mask, [points], (255,255,255))
+        cropped = cv2.bitwise_and(self.__canvas, mask)
+        cv2.imshow("Cropped", cropped)
+        self.__vertices = []
+        self.is_drawing = False
+        self.show_info()
+
     def free(self):
         cv2.destroyAllWindows()
 
