@@ -1,8 +1,10 @@
 import cv2
 from drawing_modes import DrawingModes
 from painter import Painter
+from tkinter import filedialog
+
 class InputHandler():
-    def __init__(self, painter : Painter):
+    def setup(self, painter : Painter):
         self.painter = painter
         cv2.setMouseCallback("Canvas", self.mouse_listener)
     def start(self):
@@ -42,3 +44,18 @@ class InputHandler():
             self.painter.add_point(x,y)
         elif event == cv2.EVENT_MOUSEMOVE:
             self.painter.placeholder(x,y)
+
+    def get_resolution(self):
+        res = input("Enter resolution (x y): ")
+        width, height = map(int, res.split())
+        return (width, height)
+
+    def get_color(self):
+        color = input("Enter a color (b g r): ")
+        b,g,r = map(int, color.split())
+        return (b, g, r)
+
+    def get_image_path(self):
+        path = filedialog.askopenfilename(title="Select an image", filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.ico"), ("All files", "*.*")])
+        return path
+    

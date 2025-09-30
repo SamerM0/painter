@@ -28,3 +28,5 @@ numpy -> arrays / matrices
 math -> math
 
 enum -> used to indentify different drawing modes
+
+tkinter -> take image path
