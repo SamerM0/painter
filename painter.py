@@ -5,14 +5,17 @@ import math
 WINDOW_NAME = "Canvas"
 ERASE_SIZE = 50
 class Painter():
-    def __init__(self,x,y,bgr_color):#initialize canvas
+    def __init__(self,x,y,bgr_color,img_path = None):#initialize canvas
         self.current_mode = DrawingModes.NONE
         self.bgr_color = bgr_color
-        self.__canvas = np.zeros((y, x, 3), dtype="uint8")
+        if img_path is not None:
+            self.__canvas = cv2.imread(img_path)
+        else:
+            self.__canvas = np.zeros((y, x, 3), dtype="uint8")
         self.__vertices = []
         self.is_drawing = False
-        self.width = x
-        self.height = y
+        self.width = self.__canvas.shape[1]
+        self.height = self.__canvas.shape[0]
         self.operations = [self.__canvas.copy()]
         self.undid_operations = []
         self.show_info()
