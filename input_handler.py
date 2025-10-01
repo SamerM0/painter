@@ -59,3 +59,6 @@ class InputHandler():
         path = filedialog.askopenfilename(title="Select an image", filetypes=[("Image files", "*.png;*.jpg;*.jpeg;*.gif;*.bmp;*.ico"), ("All files", "*.*")])
         return path
     
+    def check_for_dedicated_info_window(self):
+        use_info_window = input("Use dedicated info window? (y/n): ").lower() == 'y'
+        return use_info_window

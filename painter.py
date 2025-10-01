@@ -2,10 +2,13 @@ import cv2
 import numpy as np
 from drawing_modes import DrawingModes
 import math
+from info_window import InfoWindow
+import threading
+import time
 WINDOW_NAME = "Canvas"
 ERASE_SIZE = 50
 class Painter():
-    def __init__(self,x,y,bgr_color,img_path = None):#initialize canvas
+    def __init__(self,x,y,bgr_color,img_path = None,info_window = False):#initialize canvas
         self.current_mode = DrawingModes.NONE
         self.bgr_color = bgr_color
         if img_path is not None:
@@ -18,6 +21,12 @@ class Painter():
         self.height = self.__canvas.shape[0]
         self.operations = [self.__canvas.copy()]
         self.undid_operations = []
+        self.use_info_window = info_window
+        if info_window:#create a thread for info window
+            self.info_window = InfoWindow()
+            self.info_thread = threading.Thread(target=self.info_window.setup,daemon=True)
+            self.info_thread.start()
+            time.sleep(0.5) #give time for info window to initialize
         self.show_info()
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
@@ -28,12 +37,16 @@ class Painter():
         self.show_info()
 
     def show_info(self):
-        cv2.rectangle(self.__canvas,(0,0),(self.width,20),(255,255,255), -1)
-        cv2.putText(self.__canvas, f"Mode: {self.current_mode.name} {str(' ' * 25)} Drawing : {self.is_drawing}", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, .5, (0,0,0), 1)
+        if self.use_info_window:
+            self.info_window.update_info(self.current_mode.name, self.is_drawing)
+        else:
+            cv2.rectangle(self.__canvas,(0,0),(self.width,20),(255,255,255), -1)
+            cv2.putText(self.__canvas, f"Mode: {self.current_mode.name} {str(' ' * 25)} Drawing : {self.is_drawing}", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, .5, (0,0,0), 1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
     def erase_info(self):#erase info box
-        cv2.rectangle(self.__canvas,(0,0),(self.width,20),(0,0,0), -1)
+        if not self.use_info_window:
+            cv2.rectangle(self.__canvas,(0,0),(self.width,20),(0,0,0), -1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
     def is_running(self):#check if window is open
