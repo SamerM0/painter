@@ -30,9 +30,9 @@ class InputHandler():
                 self.painter.set_mode(DrawingModes.CROP)
 
             elif key & 0xFF == ord("a"):
-                self.painter.rotate(90)
+                self.painter.rotate(False)
             elif key & 0xFF == ord("d"):
-                self.painter.rotate(-90)
+                self.painter.rotate(True)
                 
             elif key & 0xFF == ord("u"):
                 self.painter.undo()

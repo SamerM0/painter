@@ -17,8 +17,6 @@ class Painter():
             self.__canvas = np.zeros((y, x, 3), dtype="uint8")
         self.__vertices = []
         self.is_drawing = False
-        self.width = self.__canvas.shape[1]
-        self.height = self.__canvas.shape[0]
         self.operations = [self.__canvas.copy()]
         self.undid_operations = []
         self.use_info_window = info_window
@@ -40,13 +38,13 @@ class Painter():
         if self.use_info_window:
             self.info_window.update_info(self.current_mode.name, self.is_drawing)
         else:
-            cv2.rectangle(self.__canvas,(0,0),(self.width,20),(255,255,255), -1)
+            cv2.rectangle(self.__canvas,(0,0),(self.__canvas.shape[1],20),(255,255,255), -1)
             cv2.putText(self.__canvas, f"Mode: {self.current_mode.name} {str(' ' * 25)} Drawing : {self.is_drawing}", (10, 15), cv2.FONT_HERSHEY_SIMPLEX, .5, (0,0,0), 1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
     def erase_info(self):#erase info box
         if not self.use_info_window:
-            cv2.rectangle(self.__canvas,(0,0),(self.width,20),(0,0,0), -1)
+            cv2.rectangle(self.__canvas,(0,0),(self.__canvas.shape[1],20),(0,0,0), -1)
         cv2.imshow(WINDOW_NAME, self.__canvas)
 
     def is_running(self):#check if window is open
@@ -130,12 +128,11 @@ class Painter():
         self.is_drawing = False
         self.show_info()
 
-    def rotate(self, angle):#rotate canvas using rotation matrix
+    def rotate(self, is_clockwise):#rotate canvas using rotation matrix
         if self.is_drawing:
             return #cannot rotate while drawing
         self.erase_info()
-        rotation_matrix = cv2.getRotationMatrix2D((self.width//2, (self.height-40)//2), angle, 1)
-        self.__canvas = cv2.warpAffine(self.__canvas, rotation_matrix, (self.width, self.height-40))
+        self.__canvas = cv2.rotate(self.__canvas, cv2.ROTATE_90_CLOCKWISE if is_clockwise else cv2.ROTATE_90_COUNTERCLOCKWISE)
         self.show_info()
         self.add_operation()
 
